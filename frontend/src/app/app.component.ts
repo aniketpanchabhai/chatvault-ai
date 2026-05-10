@@ -43,7 +43,7 @@ export class AppComponent implements OnInit, AfterViewChecked {
 
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
 
-  backendUrl = 'http://localhost:3000/api';
+  backendUrl = 'https://chatvault-ai.onrender.com/';
 
   // ── Auth State ──
   isAuthLoaded = false;
