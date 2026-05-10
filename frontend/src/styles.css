@@ -1,0 +1,178 @@
+/* Global styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #ffffff;
+  color: #1a1a2e;
+}
+
+html[data-theme="dark"] body {
+  background: #0f0f1a;
+  color: #e8e8e8;
+}
+
+/* Smooth transitions for dark mode */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Global scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #555;
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+
+/* Focus styles for accessibility */
+:focus-visible {
+  outline: 2px solid #5b7eff;
+  outline-offset: 2px;
+}
+
+/* Input and textarea base styles */
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+/* Button reset */
+button {
+  font-family: inherit;
+}
+
+/* Markdown styles */
+.markdown-body {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  margin-top: 8px;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.markdown-body h1 {
+  font-size: 18px;
+}
+
+.markdown-body h2 {
+  font-size: 16px;
+}
+
+.markdown-body h3 {
+  font-size: 15px;
+}
+
+.markdown-body strong {
+  font-weight: 700;
+}
+
+.markdown-body em {
+  font-style: italic;
+}
+
+.markdown-body a {
+  color: #5b7eff;
+  text-decoration: underline;
+}
+
+.markdown-body a:hover {
+  color: #4563cc;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  margin: 8px 0 8px 16px;
+}
+
+.markdown-body li {
+  margin: 4px 0;
+}
+
+.markdown-body blockquote {
+  border-left: 3px solid #5b7eff;
+  padding-left: 10px;
+  margin: 8px 0;
+  color: #666;
+  font-style: italic;
+}
+
+.markdown-body table {
+  border-collapse: collapse;
+  margin: 8px 0;
+}
+
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid #ddd;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.markdown-body th {
+  background: #f0f2f5;
+  font-weight: 600;
+}
+
+html[data-theme="dark"] .markdown-body blockquote {
+  color: #999;
+}
+
+html[data-theme="dark"] .markdown-body th {
+  background: #252536;
+}
+
+html[data-theme="dark"] .markdown-body th,
+html[data-theme="dark"] .markdown-body td {
+  border-color: #333;
+}
+
+html[data-theme="dark"] .markdown-body a {
+  color: #7d9eff;
+}
+
+html[data-theme="dark"] .markdown-body a:hover {
+  color: #9dbcff;
+}
+

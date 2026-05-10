@@ -1,0 +1,302 @@
+<!-- ============================================================
+  app.component.html - Modern AI Chat UI with Dark Mode Support
+============================================================ -->
+
+<div class="app-wrapper" [attr.data-theme]="isDarkMode ? 'dark' : 'light'">
+
+  <!-- ═══════════════════════════════════════
+    LOADING STATE: Clerk SDK initializing
+  ═══════════════════════════════════════ -->
+  <div class="loading-overlay" *ngIf="!isAuthLoaded">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Loading...</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+    TOP HEADER BAR
+  ═══════════════════════════════════════ -->
+  <header class="app-header" *ngIf="isAuthLoaded">
+    <div class="header-left">
+      <span class="logo">✨</span>
+      <div class="header-branding">
+        <span class="app-title">ChatVault AI</span>
+        <span class="app-subtitle">Your AI, Your Data</span>
+      </div>
+    </div>
+    <div class="header-center">
+      <!-- Show source count when signed in -->
+      <span class="source-count-badge" *ngIf="currentUser">
+        {{ getSelectedCount() }} / {{ sources.length }} sources active
+      </span>
+    </div>
+    <div class="header-right">
+      <!-- Theme Toggle -->
+      <button class="theme-toggle-btn" (click)="toggleDarkMode()" [title]="isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
+        {{ isDarkMode ? '☀️' : '🌙' }}
+      </button>
+
+      <!-- Settings Menu (only visible when authenticated) -->
+      <div class="settings-menu-container" *ngIf="currentUser">
+        <button class="settings-btn" (click)="toggleSettingsMenu()" title="Settings">⚙️</button>
+        <div class="settings-dropdown" *ngIf="showSettingsMenu">
+          <div class="settings-item" (click)="toggleUploadSettings()">
+            <span class="settings-icon">📁</span>
+            <span>Upload Options</span>
+          </div>
+          <div class="settings-divider" *ngIf="showUploadSettings"></div>
+          <div class="settings-submenu" *ngIf="showUploadSettings">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="uploadSettings.enablePDF" />
+              <span>PDF Upload</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="uploadSettings.enableText" />
+              <span>Text Upload</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="uploadSettings.enableURL" />
+              <span>URL/Website</span>
+            </label>
+          </div>
+          <div class="settings-divider"></div>
+          <div class="settings-item" (click)="openAbout()">
+            <span class="settings-icon">ℹ️</span>
+            <span>About</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Not signed in → Show Sign In button -->
+      <button class="auth-btn sign-in-btn" *ngIf="!currentUser" (click)="signIn()">
+        🔐 Sign In
+      </button>
+
+      <!-- Signed in → Show user info + Sign Out -->
+      <div class="user-info" *ngIf="currentUser">
+        <div class="user-avatar">{{ getUserInitials() }}</div>
+        <div class="user-details">
+          <span class="user-name">{{ currentUser.firstName || currentUser.emailAddress }}</span>
+          <span class="user-email">{{ currentUser.emailAddress }}</span>
+        </div>
+        <button class="auth-btn sign-out-btn" (click)="signOut()" title="Sign Out">
+          🚪 Sign Out
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════
+    NOT SIGNED IN: Landing / Sign In Screen
+  ═══════════════════════════════════════ -->
+  <div class="signin-screen" *ngIf="isAuthLoaded && !currentUser">
+    <div class="signin-container">
+      <div class="signin-card">
+        <div class="signin-logo">✨</div>
+        <h1 class="signin-title">ChatVault AI</h1>
+        <p class="signin-subtitle">Your personal AI that answers questions from your own documents</p>
+
+        <div class="signin-features">
+          <div class="feature-card">
+            <div class="feature-card-header">📄</div>
+            <strong>Upload your documents</strong>
+            <p>PDF, TXT, CSV, JSON files or website URLs</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-card-header">🔒</div>
+            <strong>Private by default</strong>
+            <p>Your data is only visible to you — never shared</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-card-header">🧠</div>
+            <strong>AI-powered answers</strong>
+            <p>Gemini searches your documents to answer questions</p>
+          </div>
+        </div>
+
+        <button class="signin-cta-btn" (click)="signIn()">
+          🔐 Sign In to Get Started
+        </button>
+        <p class="signin-note">Free to use — sign in with Google, GitHub, or email</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+    MAIN CONTENT: TWO PANELS (signed in only)
+  ═══════════════════════════════════════ -->
+  <div class="main-content" *ngIf="isAuthLoaded && currentUser">
+
+    <!-- ─────────────────────────────────────
+      LEFT PANEL: Data Source Management
+    ───────────────────────────────────── -->
+    <div class="left-panel">
+
+      <!-- Panel Header -->
+      <div class="panel-header">
+        <h2 class="panel-title">📁 Data Sources</h2>
+        <div class="select-actions" *ngIf="sources.length > 0">
+          <button class="text-btn" (click)="selectAll()">All</button>
+          <span class="divider">|</span>
+          <button class="text-btn" (click)="deselectAll()">None</button>
+        </div>
+      </div>
+
+      <!-- Source List -->
+      <div class="source-list">
+
+        <div class="empty-state" *ngIf="sources.length === 0">
+          <div class="empty-icon">📭</div>
+          <p>No sources yet</p>
+          <small>Upload files or add links below to get started</small>
+        </div>
+
+        <div
+          class="source-item"
+          *ngFor="let source of sources"
+          [class.selected]="source.selected"
+        >
+          <input
+            type="checkbox"
+            [(ngModel)]="source.selected"
+            class="source-checkbox"
+            [id]="'src-' + source.id"
+          />
+          <label [for]="'src-' + source.id" class="source-label">
+            <span class="source-icon">{{ getSourceIcon(source.type) }}</span>
+            <span class="source-name" [title]="source.fullUrl || source.name">
+              {{ formatSourceName(source.name) }}
+            </span>
+          </label>
+          <span class="chunk-badge" *ngIf="source.chunkCount">{{ source.chunkCount }}</span>
+          <button class="delete-btn" (click)="deleteSource(source, $event)" title="Delete this source">🗑️</button>
+        </div>
+      </div>
+
+      <!-- Upload Area -->
+      <div class="upload-area">
+        <p class="upload-section-title">➕ Add New Source</p>
+
+        <label class="upload-file-btn" *ngIf="uploadSettings.enablePDF || uploadSettings.enableText">
+          <span *ngIf="!isUploading">📂 Upload File</span>
+          <span *ngIf="isUploading">⏳ Processing...</span>
+          <input
+            type="file"
+            [accept]="getAcceptedFileTypes()"
+            (change)="onFileSelected($event)"
+            [disabled]="isUploading"
+            style="display:none"
+          />
+        </label>
+
+        <div class="link-input-group" *ngIf="uploadSettings.enableURL">
+          <input
+            type="url"
+            class="link-input"
+            placeholder="https://example.com or YouTube URL"
+            [(ngModel)]="linkInput"
+            [disabled]="isUploading"
+            (keyup.enter)="addLink()"
+          />
+          <button class="add-link-btn" (click)="addLink()" [disabled]="isUploading || !linkInput.trim()">
+            {{ isUploading ? '⏳' : '➕' }}
+          </button>
+        </div>
+
+        <div class="upload-feedback error" *ngIf="uploadError">⚠️ {{ uploadError }}</div>
+        <div class="upload-feedback success" *ngIf="uploadSuccess">{{ uploadSuccess }}</div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────
+      RIGHT PANEL: Chat Interface
+    ───────────────────────────────────── -->
+    <div class="right-panel">
+
+      <!-- Panel Header -->
+      <div class="panel-header">
+        <h2 class="panel-title">💬 Chat</h2>
+        <button class="text-btn" (click)="clearChat()" *ngIf="messages.length > 1">Clear</button>
+      </div>
+
+      <!-- Messages -->
+      <div class="messages-container" #messagesContainer>
+
+        <div
+          *ngFor="let msg of messages"
+          class="message-card"
+          [class.user-message]="msg.role === 'user'"
+          [class.bot-message]="msg.role === 'bot'"
+        >
+          <div class="message-avatar">
+            <span *ngIf="msg.role === 'bot'">🤖</span>
+            <span *ngIf="msg.role === 'user'">{{ getUserInitials() }}</span>
+          </div>
+          <div class="message-card-body">
+            <div class="message-content">
+              <div class="message-text" *ngIf="msg.role === 'user'">{{ msg.text }}</div>
+              <div class="message-text markdown-body" *ngIf="msg.role === 'bot'">
+                <markdown [data]="msg.text"></markdown>
+              </div>
+            </div>
+            <div class="sources-used" *ngIf="msg.sourcesUsed && msg.sourcesUsed.length > 0">
+              <span class="sources-label">📚 Sources:</span>
+              <span class="source-tag" *ngFor="let src of msg.sourcesUsed">{{ src }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Typing indicator -->
+        <div class="message-card bot-message" *ngIf="isLoading">
+          <div class="message-avatar">🤖</div>
+          <div class="message-card-body">
+            <div class="typing-indicator">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Error Banner -->
+      <div class="chat-error" *ngIf="chatError">{{ chatError }}</div>
+
+      <!-- Input Area -->
+      <div class="chat-input-area">
+        <textarea
+          class="chat-input"
+          placeholder="Ask a question about your uploaded sources..."
+          [(ngModel)]="userInput"
+          (keydown)="onKeyPress($event)"
+          [disabled]="isLoading"
+          rows="1"
+        ></textarea>
+        <button
+          class="send-btn"
+          (click)="sendMessage()"
+          [disabled]="isLoading || !userInput.trim()"
+        >
+          {{ isLoading ? '⏳' : '➤' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+    FOOTER
+  ═══════════════════════════════════════ -->
+  <footer class="app-footer" *ngIf="isAuthLoaded && currentUser">
+    <div class="footer-content">
+      <p class="footer-text">© Aniket Panchabhai</p>
+      <div class="footer-links">
+        <a href="#" class="footer-link">Privacy</a>
+        <span class="footer-divider">•</span>
+        <a href="#" class="footer-link">Terms</a>
+        <span class="footer-divider">•</span>
+        <span class="footer-version">v1.0</span>
+      </div>
+    </div>
+  </footer>
+</div>

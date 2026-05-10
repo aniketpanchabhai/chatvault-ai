@@ -1,0 +1,23 @@
+# Environment files - NEVER commit these
+.env
+*.env
+
+# Node modules
+node_modules/
+*/node_modules/
+
+# Uploaded files (temp storage)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Angular build output
+frontend/dist/
+frontend/.angular/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
